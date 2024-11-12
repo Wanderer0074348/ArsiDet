@@ -1,59 +1,65 @@
+import streamlit as st
 from ultralytics import YOLO
 import cv2
 import torch
+import numpy as np
 
 
-model = YOLO('models/ArabicSignLanguage60.pt')
+@st.cache_resource
+def load_model():
+    model = YOLO('models/ArabicSignLanguage60.pt')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.to(device)
+    return model
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model.to(device)
+def main():
+    st.title("Arabic Sign Language Detection")
+
+    model = load_model()
+
+    video_placeholder = st.empty()
+
+    if 'camera_on' not in st.session_state:
+        st.session_state.camera_on = False
+
+    if not st.session_state.camera_on:
+        if st.button("Start Camera", key="start_camera"):
+            st.session_state.camera_on = True
+    else:
+        if st.button("Stop Camera", key="stop_camera"):
+            st.session_state.camera_on = False
+
+    if st.session_state.camera_on:
+        cap = cv2.VideoCapture(0)
+
+        while st.session_state.camera_on:
+            ret, frame = cap.read()
+            if not ret:
+                st.error("Failed to grab frame from camera")
+                break
+
+            results = model(frame, conf=0.25)
+
+            result_frame = results[0].plot()
+
+            result_frame_rgb = cv2.cvtColor(result_frame, cv2.COLOR_BGR2RGB)
+
+            video_placeholder.image(
+                result_frame_rgb, channels="RGB", use_column_width=True)
+
+            for result in results:
+                boxes = result.boxes
+                if len(boxes) > 0:
+                    for box in boxes:
+                        class_id = int(box.cls[0])
+                        class_name = model.names[class_id]
+                        confidence = box.conf[0]
+                        st.write(
+                            f"Detected: {class_name}, Confidence: {confidence:.2f}")
+
+        cap.release()
 
 
-cap = cv2.VideoCapture(0)
-
-while True:
-
-    ret, frame = cap.read()
-    if not ret:
-        print("Failed to grab frame")
-        break
-
-    results = model(frame, conf=0.30)
-
-    for result in results:
-        boxes = result.boxes
-
-        if len(boxes) == 0:
-            print("No detections found in the frame.")
-        else:
-            for box in boxes:
-
-                x1, y1, x2, y2 = box.xyxy[0]
-
-                confidence = box.conf[0]
-
-                class_id = int(box.cls[0])
-                class_name = model.names[class_id]
-
-                print(f"Detected: {class_name}")
-                print(f"Confidence: {confidence:.2f}")
-                print(
-                    f"Bounding Box: ({x1:.2f}, {y1:.2f}) to ({x2:.2f}, {y2:.2f})")
-                print("---")
-
-    result_frame = results[0].plot()
-
-    cv2.imshow('Arabic Sign Language Detection', result_frame)
-
-    print(f"Frame shape: {frame.shape}")
-    print(f"Inference time: {results[0].speed['inference']:.1f}ms")
-    print(f"Preprocess time: {results[0].speed['preprocess']:.1f}ms")
-    print(f"Postprocess time: {results[0].speed['postprocess']:.1f}ms")
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()
