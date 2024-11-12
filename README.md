@@ -7,13 +7,13 @@ This project uses a YOLO model for Arabic Sign Language detection with a Streaml
 1. Clone this repository:
    ```
    git clone https://github.com/Wanderer0074348/ArsiDet.git
-   cd arabic-sign-language-detection
+   cd ArsiDet
    ```
 
 2. Create a virtual environment (optional but recommended):
    ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   python -m venv env
+   source env/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
 
 3. Install the requirements:
@@ -25,16 +25,14 @@ This project uses a YOLO model for Arabic Sign Language detection with a Streaml
 
 1. Ensure your webcam is connected and functioning.
 
-2. Place your trained model file `ArabicSignLanguage60.pt` in the project directory.
-
-3. Run the Streamlit app:
+2. Run the Streamlit app:
    ```
    streamlit run app.py
    ```
 
-4. Your default web browser should open automatically. If not, navigate to the URL shown in the terminal (usually `http://localhost:8501`).
+3. Your default web browser should open automatically. If not, navigate to the URL shown in the terminal (usually `http://localhost:8501`).
 
-5. In the Streamlit interface:
+4. In the Streamlit interface:
    - Click "Start Camera" to begin the sign language detection.
    - The video feed will appear with real-time detections.
    - Detection results will be displayed below the video feed.
@@ -55,8 +53,4 @@ The main requirements for this project are:
 - PyTorch
 
 For a complete list of dependencies, refer to the `requirements.txt` file.
-
-## License
-
-[Include your license information here]
 
