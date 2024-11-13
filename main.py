@@ -97,7 +97,7 @@ def main():
                 st.error("Failed to grab frame from camera")
                 break
 
-            results = model(frame, conf=0.25)
+            results = model(frame, conf=0.50)
 
             result_frame = results[0].plot()
 
@@ -111,7 +111,7 @@ def main():
     st.markdown("""
     <div style="text-align: center; margin-top: 50px; font-family: 'Cairo', sans-serif;">
         <h2 style="color: #16a085;">About Arabic Sign Language Detection</h2>
-        <p style="color:#000000;>This application uses advanced AI to detect and interpret Arabic sign language in real-time.</p>
+        <p style="color:#000000;">This application uses advanced AI to detect and interpret Arabic sign language in real-time.</p>
     </div>
     """, unsafe_allow_html=True)
 
