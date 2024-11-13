@@ -48,16 +48,6 @@ def main():
             video_placeholder.image(
                 result_frame_rgb, channels="RGB", use_column_width=True)
 
-            for result in results:
-                boxes = result.boxes
-                if len(boxes) > 0:
-                    for box in boxes:
-                        class_id = int(box.cls[0])
-                        class_name = model.names[class_id]
-                        confidence = box.conf[0]
-                        st.write(
-                            f"Detected: {class_name}, Confidence: {confidence:.2f}")
-
         cap.release()
 
 
