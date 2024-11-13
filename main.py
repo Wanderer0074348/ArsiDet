@@ -46,7 +46,7 @@ def main():
             result_frame_rgb = cv2.cvtColor(result_frame, cv2.COLOR_BGR2RGB)
 
             video_placeholder.image(
-                result_frame_rgb, channels="RGB", use_column_width=True)
+                result_frame_rgb, channels="RGB", use_container_width=True)
 
         cap.release()
 
