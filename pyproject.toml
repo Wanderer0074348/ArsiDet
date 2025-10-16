@@ -20,4 +20,6 @@ dependencies = [
     "torchvision>=0.24.0",
     "tqdm>=4.67.1",
     "ultralytics>=8.0.0",
+    "streamlit-webrtc>=0.63.11",
+    "av>=16.0.1",
 ]

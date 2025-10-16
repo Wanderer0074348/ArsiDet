@@ -9,6 +9,7 @@ import streamlit as st
 from src.core.model import get_model_manager
 from src.core.video_processor import VideoProcessor
 from src.core.browser_camera_processor import BrowserCameraProcessor
+from src.core.webrtc_processor import WebRTCProcessor
 from src.core.ai_agent import SignLanguageInterpreter
 from src.ui.styles import apply_custom_styles, render_about_section
 from src.ui.components import (
@@ -53,7 +54,20 @@ def main():
         st.markdown("---")
 
     # Handle different input modes
-    if input_mode == 'browser_camera':
+    if input_mode == 'webrtc':
+        # WebRTC mode - LIVE streaming (works on cloud!)
+        st.subheader("🌐 WebRTC Live Camera Mode")
+        st.info("✅ **LIVE VIDEO** streaming - Works on cloud platforms!")
+
+        webrtc_processor = WebRTCProcessor(
+            model_manager=model_manager,
+            ai_interpreter=ai_interpreter
+        )
+        webrtc_processor.run_webrtc_stream(
+            interpretation_placeholder=interpretation_placeholder
+        )
+
+    elif input_mode == 'browser_camera':
         # Browser camera mode (works on cloud)
         st.subheader("📸 Browser Camera Mode")
         st.info("✅ This mode works on cloud platforms like Render, Streamlit Cloud, and Hugging Face")

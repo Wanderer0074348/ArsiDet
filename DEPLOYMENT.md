@@ -4,12 +4,13 @@ This guide explains how to deploy ArsiDet (Arabic Sign Language Detection) to va
 
 ## How It Works
 
-ArsiDet now supports **two camera modes**:
+ArsiDet now supports **THREE camera modes**:
 
-1. **Browser Camera Mode** (📸 Works on Cloud) - Uses Streamlit's `st.camera_input()` to access the user's webcam through their browser
-2. **Local Webcam Mode** (🎥 Local Only) - Uses OpenCV to access the server's webcam (only works locally)
+1. **WebRTC Live Mode** (🌐 **RECOMMENDED for Cloud**) - Real-time live video streaming using WebRTC. Works on ALL cloud platforms!
+2. **Browser Camera Snapshot Mode** (📸 Works on Cloud) - Uses Streamlit's `st.camera_input()` to capture individual images
+3. **Local Webcam Mode** (🎥 Local Only) - Uses OpenCV to access the server's webcam (only works locally)
 
-For cloud deployment, the app will use **Browser Camera Mode**, which captures images from the user's browser camera.
+For cloud deployment, **WebRTC Live Mode is the best choice** as it provides real-time continuous video processing just like running locally!
 
 ---
 
@@ -130,11 +131,14 @@ git push
 
 Once deployed, users can:
 
-1. **Select "Browser Camera" mode** (default for cloud)
-2. **Click "Take Photo"** to capture their sign language gesture
-3. The app will detect and interpret the sign
-4. Detected signs are buffered every 2 seconds
-5. AI interprets the complete sentence every 20 seconds (if API key is provided)
+1. **Select "WebRTC Live" mode** (RECOMMENDED - default for cloud)
+2. **Click "START"** to begin live video streaming
+3. Allow camera access when prompted by browser
+4. The app will continuously detect signs in real-time
+5. Detected signs are buffered every 2 seconds
+6. AI interprets the complete sentence every 20 seconds (if API key is provided)
+
+**Alternative**: Use "Browser Camera Snapshot" mode to capture individual images instead of continuous video.
 
 ---
 

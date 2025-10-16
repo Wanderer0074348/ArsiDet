@@ -13,22 +13,24 @@ class InputModeSelector:
         Render input mode selector
 
         Returns:
-            Selected mode: 'local_camera', 'upload', or 'browser_camera'
+            Selected mode: 'webrtc', 'browser_camera', 'upload', or 'local_camera'
         """
         with st.sidebar:
             st.header("Input Mode")
             mode = st.radio(
                 "Select Input Method",
-                options=['browser_camera', 'upload', 'local_camera'],
+                options=['webrtc', 'browser_camera', 'local_camera'],
                 format_func=lambda x: {
-                    'browser_camera': '📸 Browser Camera (Works on Cloud)',
-                    'upload': '📤 Upload Image/Video',
+                    'webrtc': '🌐 WebRTC Live (RECOMMENDED for Cloud)',
+                    'browser_camera': '📸 Browser Camera Snapshot',
                     'local_camera': '🎥 Local Webcam (Local Only)'
                 }[x],
-                help="Browser Camera and Upload work on cloud deployments like Render"
+                help="WebRTC provides LIVE video streaming and works on all cloud platforms!"
             )
 
-            if mode == 'local_camera':
+            if mode == 'webrtc':
+                st.success("✅ **Best choice for deployment!**\nReal-time live video streaming")
+            elif mode == 'local_camera':
                 st.warning("⚠️ Local Webcam only works when running locally, not on cloud platforms")
 
             return mode
@@ -121,6 +123,10 @@ def render_api_key_input() -> str:
 
 def render_interpretation_history():
     """Render the interpretation history"""
+    # Initialize if not exists
+    if 'interpretation_history' not in st.session_state:
+        st.session_state.interpretation_history = []
+
     if st.session_state.interpretation_history:
         st.subheader("Interpretation History")
 
