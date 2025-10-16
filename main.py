@@ -1,119 +1,100 @@
+"""
+Arabic Sign Language Detection Application
+
+This is the main entry point for the Streamlit application with AI-powered interpretation.
+"""
+
 import streamlit as st
-from ultralytics import YOLO
-import cv2
-import torch
-import numpy as np
 
-@st.cache_resource
-def load_model():
-    model = YOLO('models/ArabicSignLanguage60.pt')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model.to(device)
-    return model
+from src.core.model import get_model_manager
+from src.core.video_processor import VideoProcessor
+from src.core.browser_camera_processor import BrowserCameraProcessor
+from src.core.ai_agent import SignLanguageInterpreter
+from src.ui.styles import apply_custom_styles, render_about_section
+from src.ui.components import (
+    InputModeSelector,
+    CameraControls,
+    create_video_placeholder,
+    create_interpretation_placeholder,
+    render_api_key_input,
+    render_interpretation_history,
+)
+from src.utils.config import APP_TITLE
 
-def set_custom_style():
-    st.markdown("""
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cairo&family=Amiri&display=swap');
-
-            .stApp {
-                background-color: #f0f0f0;
-                font-family: 'Cairo', sans-serif;
-            }
-
-            h1 {
-                color: #16a085;
-                font-family: 'Amiri', serif;
-                font-size: 40px;
-                font-weight: bold;
-                text-align: center;
-                margin-top: 30px;
-                margin-bottom: 30px;
-            }
-
-            .stButton > button {
-                background-color: #16a085;
-                color: white;
-                font-weight: bold;
-                border-radius: 5px;
-                padding: 10px 20px;
-                font-family: 'Cairo', sans-serif;
-            }
-
-            .stButton > button:hover {
-                background-color: #1abc9c;
-            }
-
-            .stImage > img {
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            }
-
-            .streamlit-expanderHeader {
-                font-size: 18px;
-                font-weight: bold;
-                color: #16a085;
-                font-family: 'Amiri', serif;
-            }
-
-            .stAlert > div {
-                background-color: #f1c40f;
-                color: #333;
-                border-radius: 5px;
-                padding: 10px;
-                font-family: 'Cairo', sans-serif;
-            }
-        </style>
-    """, unsafe_allow_html=True)
 
 def main():
-    set_custom_style()
+    """Main application entry point"""
+    # Apply custom styling
+    apply_custom_styles()
 
-    st.title("Arabic Sign Language Detection")
+    # Set page title
+    st.title(APP_TITLE)
 
-    model = load_model()
+    # Render API key input in sidebar
+    api_key = render_api_key_input()
 
-    video_placeholder = st.empty()
+    # Render input mode selector
+    input_mode = InputModeSelector.render_mode_selector()
 
-    if 'camera_on' not in st.session_state:
-        st.session_state.camera_on = False
+    # Load model manager (cached)
+    model_manager = get_model_manager()
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if not st.session_state.camera_on:
-            if st.button("Start Camera", key="start_camera"):
-                st.session_state.camera_on = True
-    with col2:
-        if st.session_state.camera_on:
-            if st.button("Stop Camera", key="stop_camera"):
-                st.session_state.camera_on = False
+    # Initialize AI interpreter if API key is provided
+    ai_interpreter = None
+    if api_key:
+        ai_interpreter = SignLanguageInterpreter(api_key=api_key)
 
-    if st.session_state.camera_on:
-        cap = cv2.VideoCapture(0)
+    # Create interpretation placeholder if AI is enabled
+    interpretation_placeholder = None
+    if ai_interpreter:
+        st.markdown("---")
+        st.subheader("AI Interpretation")
+        interpretation_placeholder = create_interpretation_placeholder()
+        st.markdown("---")
 
-        while st.session_state.camera_on:
-            ret, frame = cap.read()
-            if not ret:
-                st.error("Failed to grab frame from camera")
-                break
+    # Handle different input modes
+    if input_mode == 'browser_camera':
+        # Browser camera mode (works on cloud)
+        st.subheader("📸 Browser Camera Mode")
+        st.info("✅ This mode works on cloud platforms like Render, Streamlit Cloud, and Hugging Face")
 
-            results = model(frame, conf=0.50)
+        browser_processor = BrowserCameraProcessor(
+            model_manager=model_manager,
+            ai_interpreter=ai_interpreter
+        )
+        browser_processor.run_camera_input(
+            interpretation_placeholder=interpretation_placeholder
+        )
 
-            result_frame = results[0].plot()
+    elif input_mode == 'local_camera':
+        # Local webcam mode (OpenCV - only works locally)
+        st.subheader("🎥 Local Webcam Mode")
 
-            result_frame_rgb = cv2.cvtColor(result_frame, cv2.COLOR_BGR2RGB)
+        # Create placeholders
+        video_placeholder = create_video_placeholder()
 
-            video_placeholder.image(
-                result_frame_rgb, channels="RGB", use_container_width=True)
+        # Render camera controls
+        camera_on, _ = CameraControls.render_controls()
 
-        cap.release()
+        # Run detection if camera is on
+        if camera_on:
+            video_processor = VideoProcessor(
+                model_manager=model_manager,
+                ai_interpreter=ai_interpreter
+            )
+            video_processor.run_detection_loop(
+                video_placeholder=video_placeholder,
+                interpretation_placeholder=interpretation_placeholder
+            )
 
-    st.markdown("""
-    <div style="text-align: center; margin-top: 50px; font-family: 'Cairo', sans-serif;">
-        <h2 style="color: #16a085;">About Arabic Sign Language Detection</h2>
-        <p style="color:#000000;">This application uses advanced AI to detect and interpret Arabic sign language in real-time.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Render interpretation history (persists after camera is stopped)
+    if ai_interpreter:
+        st.markdown("---")
+        render_interpretation_history()
+
+    # Render about section
+    render_about_section()
+
 
 if __name__ == "__main__":
     main()
