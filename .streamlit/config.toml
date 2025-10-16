@@ -9,6 +9,12 @@ font = "sans serif"
 headless = true
 enableCORS = false
 port = 8501
+enableXsrfProtection = false
+maxUploadSize = 200
 
 [browser]
 gatherUsageStats = false
+serverAddress = "0.0.0.0"
+
+[runner]
+fastReruns = true

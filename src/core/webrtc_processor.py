@@ -17,9 +17,18 @@ from ..utils.config import CONFIDENCE_THRESHOLD
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# WebRTC configuration for cloud deployment
+# WebRTC configuration for cloud deployment with multiple STUN servers
 RTC_CONFIGURATION = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    {
+        "iceServers": [
+            {"urls": ["stun:stun.l.google.com:19302"]},
+            {"urls": ["stun:stun1.l.google.com:19302"]},
+            {"urls": ["stun:stun2.l.google.com:19302"]},
+            {"urls": ["stun:stun3.l.google.com:19302"]},
+            {"urls": ["stun:stun4.l.google.com:19302"]},
+        ],
+        "iceTransportPolicy": "all",
+    }
 )
 
 
